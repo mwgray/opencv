@@ -92,9 +92,9 @@ class Builder:
         self.workdir = check_dir(workdir, create=True)
         self.opencvdir = check_dir(opencvdir)
         self.extra_modules_path = None
-        self.libdest = check_dir(os.path.join(self.workdir, "o4a"), create=True, clean=True)
-        self.docdest = check_dir(os.path.join(self.workdir, "javadoc"), create=True, clean=True)
-        self.resultdest = check_dir(os.path.join(self.workdir, "OpenCV-android-sdk"), create=True, clean=True)
+        self.libdest = check_dir(os.path.join(self.workdir, "o4a"), create=True, clean=False)
+        self.docdest = check_dir(os.path.join(self.workdir, "javadoc"), create=True, clean=False)
+        self.resultdest = check_dir(os.path.join(self.workdir, "OpenCV-android-sdk"), create=True, clean=False)
         self.extra_packs = []
         self.opencv_version = determine_opencv_version(os.path.join(self.opencvdir, "modules", "core", "include", "opencv2", "core", "version.hpp"))
         self.engine_version = determine_engine_version(os.path.join(self.opencvdir, "platforms", "android", "service", "engine", "AndroidManifest.xml"))
@@ -112,13 +112,17 @@ class Builder:
         self.extra_packs.append((ver, check_dir(path)))
 
     def clean_library_build_dir(self):
-        for d in ["CMakeCache.txt", "CMakeFiles/", "bin/", "libs/", "lib/", "package/", "install/samples/"]:
+        for d in ["CMakeCache.txt",
+                  #"CMakeFiles/", "bin/", "libs/", "lib/", "package/", "install/samples/"
+                  ]:
             rm_one(d)
 
     def build_library(self, abi, do_install):
         cmd = [
             "cmake",
             "-GNinja",
+            "--verbose=1",
+            "-DCMAKE_RULE_MESSAGES:BOOL=OFF",
             "-DCMAKE_TOOLCHAIN_FILE='%s'" % self.get_toolchain_file(),
             "-DWITH_OPENCL=OFF",
             "-DWITH_CUDA=OFF",
@@ -127,8 +131,8 @@ class Builder:
             "-DBUILD_TESTS=OFF",
             "-DBUILD_PERF_TESTS=OFF",
             "-DBUILD_DOCS=OFF",
-            "-DBUILD_ANDROID_EXAMPLES=ON",
-            "-DINSTALL_ANDROID_EXAMPLES=ON",
+            "-DBUILD_ANDROID_EXAMPLES=OFF",
+            "-DINSTALL_ANDROID_EXAMPLES=OFF",
             "-DANDROID_STL=gnustl_static",
             "-DANDROID_NATIVE_API_LEVEL=9",
             "-DANDROID_ABI='%s'" % abi.cmake_name,
@@ -144,7 +148,7 @@ class Builder:
         if self.use_ccache == True:
             cmd.append("-DNDK_CCACHE=ccache")
         if do_install:
-            cmd.extend(["-DBUILD_TESTS=ON", "-DINSTALL_TESTS=ON"])
+            cmd.extend(["-DBUILD_TESTS=OFF", "-DINSTALL_TESTS=OFF"])
         execute(cmd)
         if do_install:
             execute(["ninja"])
@@ -301,7 +305,7 @@ if __name__ == "__main__":
             continue
 
         do_install = (i == 0)
-        engdest = check_dir(os.path.join(builder.workdir, "build_service_%s" % abi.name), create=True, clean=True)
+        engdest = check_dir(os.path.join(builder.workdir, "build_service_%s" % abi.name), create=True, clean=False)
 
         log.info("=====")
         log.info("===== Building library for %s", abi)
