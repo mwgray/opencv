@@ -311,18 +311,18 @@ if __name__ == "__main__":
         builder.clean_library_build_dir()
         builder.build_library(abi, do_install)
 
-        log.info("=====")
-        log.info("===== Building engine for %s", abi)
-        log.info("=====")
-
-        os.chdir(engdest)
-        builder.build_engine(abi, engdest)
-        engines.append((abi.name, engdest))
+        # log.info("=====")
+        # log.info("===== Building engine for %s", abi)
+        # log.info("=====")
+        #
+        # os.chdir(engdest)
+        # builder.build_engine(abi, engdest)
+        # engines.append((abi.name, engdest))
 
     if args.build_doc:
         builder.build_javadoc()
 
-    builder.gather_results(engines)
+    # builder.gather_results(engines)
 
     log.info("=====")
     log.info("===== Build finished")
