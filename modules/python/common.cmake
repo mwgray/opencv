@@ -77,7 +77,7 @@ foreach(uh ${opencv_userdef_hdrs})
     file(APPEND ${cv2_custom_hdr} "#include \"${uh}\"\n")
 endforeach(uh)
 
-ocv_add_library(${the_module} MODULE ${PYTHON_SOURCE_DIR}/src2/cv2.cpp ${cv2_generated_hdrs} ${opencv_userdef_hdrs} ${cv2_custom_hdr})
+ocv_add_library(${the_module} SHARED ${PYTHON_SOURCE_DIR}/src2/cv2.cpp ${cv2_generated_hdrs} ${opencv_userdef_hdrs} ${cv2_custom_hdr})
 add_dependencies(${the_module} gen_${the_module})
 
 if(APPLE)

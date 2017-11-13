@@ -1378,10 +1378,12 @@ if( ANDROID_NO_UNDEFINED )
  if( MIPS )
   # there is some sysroot-related problem in mips linker...
   if( NOT ANDROID_SYSROOT MATCHES "[ ;\"]" )
-   set( ANDROID_LINKER_FLAGS "${ANDROID_LINKER_FLAGS} -Wl,--no-undefined -Wl,-rpath-link,${ANDROID_SYSROOT}/usr/lib" )
+   # since we are building a shared library, we need to soft link to libpython
+   set( ANDROID_LINKER_FLAGS "${ANDROID_LINKER_FLAGS} -Wl,--no-undefined /Users/mwgray/Downloads/python-x86/lib/libpython2.7.so -Wl,-rpath-link,${ANDROID_SYSROOT}/usr/lib" )
   endif()
  else()
-  set( ANDROID_LINKER_FLAGS "${ANDROID_LINKER_FLAGS} -Wl,--no-undefined" )
+   # since we are building a shared library, we need to soft link to libpython
+   set( ANDROID_LINKER_FLAGS "${ANDROID_LINKER_FLAGS} -Wl,--no-undefined /Users/mwgray/Downloads/python-x86/lib/libpython2.7.so" )
  endif()
 endif()
 

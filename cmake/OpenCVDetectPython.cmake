@@ -47,9 +47,41 @@ if(NOT ${found})
     endforeach()
   endif()
 
+  message(STATUS "Checking for executable ${PythonInterp}-${preferred_version}")
   string(REGEX MATCH "^[0-9]+" _preferred_version_major ${preferred_version})
 
   find_host_package(PythonInterp "${preferred_version}")
+  message (STATUS "The default python detection is broken; it tries to run the python executable to see what version")
+  message (STATUS "is outputted.  Since we are providing a executable that doesn't run on the host, it breaks and")
+  message (STATUS "assumes 1.4 is the python version.")
+  message (STATUS "BROKEN CONFIG")
+  message (STATUS "-------------")
+  message (STATUS "Was the Python executable found   : ${PYTHONINTERP_FOUND}")
+  message (STATUS "path to the Python interpreter    : ${PYTHON_EXECUTABLE}")
+  message (STATUS "Python version found e.g. 2.5.2   : ${PYTHON_VERSION_STRING}")
+  message (STATUS "Python major version found e.g. 2 : ${PYTHON_VERSION_MAJOR}")
+  message (STATUS "Python minor version found e.g. 5 : ${PYTHON_VERSION_MINOR}")
+  message (STATUS "Python patch version found e.g. 2 : ${PYTHON_VERSION_PATCH}")
+
+  message (STATUS "Now we will do a hard override of python version")
+  set(PYTHONINTERP_FOUND, "TRUE")
+  # set(PYTHON_EXECUTABLE, "~/Downloads/python-x86/bin/python")
+  set(PYTHON_VERSION_STRING "2.7.12")
+  set(PYTHON_VERSION_MAJOR "2")
+  set(PYTHON_VERSION_MINOR "7")
+  set(PYTHON_VERSION_PATCH "12")
+
+  message (STATUS "FIXED CONFIG")
+  message (STATUS "------------")
+  message (STATUS "Was the Python executable found   : ${PYTHONINTERP_FOUND}")
+  message (STATUS "path to the Python interpreter    : ${PYTHON_EXECUTABLE}")
+  message (STATUS "Python version found e.g. 2.5.2   : ${PYTHON_VERSION_STRING}")
+  message (STATUS "Python major version found e.g. 2 : ${PYTHON_VERSION_MAJOR}")
+  message (STATUS "Python minor version found e.g. 5 : ${PYTHON_VERSION_MINOR}")
+  message (STATUS "Python patch version found e.g. 2 : ${PYTHON_VERSION_PATCH}")
+
+  FIND_PACKAGE_HANDLE_STANDARD_ARGS(PythonInterp REQUIRED_VARS PYTHON_EXECUTABLE VERSION_VAR PYTHON_VERSION_STRING)
+
   if(NOT PYTHONINTERP_FOUND)
     find_host_package(PythonInterp "${min_version}")
   endif()
@@ -78,7 +110,7 @@ if(NOT ${found})
   if(_found)
     set(_version_major_minor "${_version_major}.${_version_minor}")
 
-    if(NOT ANDROID AND NOT APPLE_FRAMEWORK)
+    if(NOT APPLE_FRAMEWORK)
       ocv_check_environment_variables(${library_env} ${include_dir_env})
       if(NOT ${${library_env}} STREQUAL "")
           set(PYTHON_LIBRARY "${${library_env}}")
@@ -129,7 +161,7 @@ if(NOT ${found})
       endif()
     endif()
 
-    if(NOT ANDROID AND NOT IOS)
+    if(NOT IOS)
       if(CMAKE_HOST_UNIX)
         execute_process(COMMAND ${_executable} -c "from distutils.sysconfig import *; print(get_python_lib())"
                         RESULT_VARIABLE _cvpy_process
@@ -160,6 +192,7 @@ if(NOT ${found})
         unset(_path)
       endif()
 
+      ocv_check_environment_variables(${numpy_include_dirs})
       set(_numpy_include_dirs ${${numpy_include_dirs}})
 
       if(NOT _numpy_include_dirs)
@@ -198,7 +231,7 @@ if(NOT ${found})
                           OUTPUT_STRIP_TRAILING_WHITESPACE)
         endif()
       endif()
-    endif(NOT ANDROID AND NOT IOS)
+    endif(NOT IOS)
   endif()
 
   # Export return values
@@ -230,20 +263,13 @@ find_python(2.7 "${MIN_VER_PYTHON2}" PYTHON2_LIBRARY PYTHON2_INCLUDE_DIR
     PYTHON2_INCLUDE_DIR PYTHON2_INCLUDE_DIR2 PYTHON2_PACKAGES_PATH
     PYTHON2_NUMPY_INCLUDE_DIRS PYTHON2_NUMPY_VERSION)
 
-find_python(3.4 "${MIN_VER_PYTHON3}" PYTHON3_LIBRARY PYTHON3_INCLUDE_DIR
-    PYTHON3INTERP_FOUND PYTHON3_EXECUTABLE PYTHON3_VERSION_STRING
-    PYTHON3_VERSION_MAJOR PYTHON3_VERSION_MINOR PYTHON3LIBS_FOUND
-    PYTHON3LIBS_VERSION_STRING PYTHON3_LIBRARIES PYTHON3_LIBRARY
-    PYTHON3_DEBUG_LIBRARIES PYTHON3_LIBRARY_DEBUG PYTHON3_INCLUDE_PATH
-    PYTHON3_INCLUDE_DIR PYTHON3_INCLUDE_DIR2 PYTHON3_PACKAGES_PATH
-    PYTHON3_NUMPY_INCLUDE_DIRS PYTHON3_NUMPY_VERSION)
-
-
 if(PYTHON_DEFAULT_EXECUTABLE)
     set(PYTHON_DEFAULT_AVAILABLE "TRUE")
 elseif(PYTHON2INTERP_FOUND) # Use Python 2 as default Python interpreter
+    # this python is the python used to run build scripts, so unlike the python above, we want to point to a native
+    # python version (hard path at the moment)
     set(PYTHON_DEFAULT_AVAILABLE "TRUE")
-    set(PYTHON_DEFAULT_EXECUTABLE "${PYTHON2_EXECUTABLE}")
+    set(PYTHON_DEFAULT_EXECUTABLE "/usr/bin/python")
 elseif(PYTHON3INTERP_FOUND) # Use Python 3 as fallback Python interpreter (if there is no Python 2)
     set(PYTHON_DEFAULT_AVAILABLE "TRUE")
     set(PYTHON_DEFAULT_EXECUTABLE "${PYTHON3_EXECUTABLE}")
