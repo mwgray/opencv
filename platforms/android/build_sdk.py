@@ -252,6 +252,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Build OpenCV for Android SDK')
     parser.add_argument("work_dir", help="Working directory (and output)")
     parser.add_argument("opencv_dir", help="Path to OpenCV source dir")
+    parser.add_argument('--abi', help="Which abi to build for")
     parser.add_argument('--ndk_path', help="Path to Android NDK to use for build")
     parser.add_argument('--sdk_path', help="Path to Android SDK to use for build")
     parser.add_argument("--extra_modules_path", help="Path to extra modules to use for build")
@@ -293,6 +294,12 @@ if __name__ == "__main__":
 
     engines = []
     for i, abi in enumerate(ABIs):
+
+        # skip if not the indicated abi
+        if args.abi is not None and args.abi != abi.name:
+            log.info("===== Skipping %s; was not the expected abi %s", abi, args.abi)
+            continue
+
         do_install = (i == 0)
         engdest = check_dir(os.path.join(builder.workdir, "build_service_%s" % abi.name), create=True, clean=True)
 
